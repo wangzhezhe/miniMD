@@ -50,7 +50,10 @@ class Atom
     int natoms;
     int nlocal, nghost;
     int nmax;
-
+    
+    // this is the typical SOA layout
+    // the x represents all the coordinates for each particle, x0,y0,z0,x1,y1,z1...
+    // the v represents the velocity for each particle, v0x,v0y,v0z,v1x,v1y.v1z...
     MMD_float* x;
     MMD_float* v;
     MMD_float* f;

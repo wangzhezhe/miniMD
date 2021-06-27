@@ -300,8 +300,11 @@ int read_lammps_data(Atom &atom, Comm &comm, Neighbor &neighbor, Integrate &inte
   return 0;
 }
 
+//rho represents the density, the system domain is created based on nx ny nz and the lattice
+//basically, the nx ny nz represents the number of the unit(particles) in each dimention, some logic dimention
+//and the lattice represents some physical unit
+//xprd, yprd and zprd can be the representation of the physical domain
 /* create simulation box */
-
 void create_box(Atom &atom, int nx, int ny, int nz, double rho)
 {
   double lattice = pow((4.0 / rho), (1.0 / 3.0));
@@ -310,12 +313,14 @@ void create_box(Atom &atom, int nx, int ny, int nz, double rho)
   atom.box.zprd = nz * lattice;
 }
 
+//fcc latice (face-centered cubic system)
 /* initialize atoms on fcc lattice in parallel fashion */
 
 int create_atoms(Atom &atom, int nx, int ny, int nz, double rho)
 {
+  //refer to this https://chem.libretexts.org/Bookshelves/Physical_and_Theoretical_Chemistry_Textbook_Maps/Supplemental_Modules_(Physical_and_Theoretical_Chemistry)/Physical_Properties_of_Matter/States_of_Matter/Properties_of_Solids/Crystal_Lattice/Closest_Pack_Structures
+  //for atoms per unit cell
   /* total # of atoms */
-
   atom.natoms = 4 * nx * ny * nz;
   atom.nlocal = 0;
 

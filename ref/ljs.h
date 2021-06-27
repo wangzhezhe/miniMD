@@ -35,6 +35,7 @@
 #include "types.h"
 
 struct In {
+  //set linear dimension of systembox in x/y/z direction
   int nx, ny, nz;
   MMD_float t_request;
   MMD_float rho;

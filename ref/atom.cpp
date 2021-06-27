@@ -35,7 +35,7 @@
 #include "mpi.h"
 #include "atom.h"
 #include "neighbor.h"
-
+//this value lables the size of array we extend each time
 #define DELTA 20000
 
 Atom::Atom(int ntypes_)
@@ -86,6 +86,9 @@ void Atom::growarray()
 void Atom::addatom(MMD_float x_in, MMD_float y_in, MMD_float z_in,
                    MMD_float vx_in, MMD_float vy_in, MMD_float vz_in)
 {
+  //the nlocal is the index for current particle position
+  //we grow the array(x,v,f) if it increase to the nmax value
+  //it shows how many particle exists in current array
   if(nlocal == nmax) growarray();
 
   x[nlocal*PAD + 0] = x_in;
@@ -94,11 +97,13 @@ void Atom::addatom(MMD_float x_in, MMD_float y_in, MMD_float z_in,
   v[nlocal*PAD + 0] = vx_in;
   v[nlocal*PAD + 1] = vy_in;
   v[nlocal*PAD + 2] = vz_in;
+  //it looks type array is useless in this code and it is setted as a random value
   type[nlocal] = rand()%ntypes;
 
   nlocal++;
 }
 
+// the PBC represents the periodical boundry condition http://www.gromacs.org/Documentation_of_outdated_versions/Terminology/Periodic_Boundary_Conditions
 /* enforce PBC
    order of 2 tests is important to insure lo-bound <= coord < hi-bound
    even with round-off errors where (coord +/- epsilon) +/- period = bound */
@@ -120,7 +125,7 @@ void Atom::pbc()
     if(x[i * PAD + 2] >= box.zprd) x[i * PAD + 2] -= box.zprd;
   }
 }
-
+//copy the ith particle into the jth particle
 void Atom::copy(int i, int j)
 {
   x[j * PAD + 0] = x[i * PAD + 0];

@@ -92,6 +92,7 @@ int main(int argc, char** argv)
   }
 
   MPI_Init(&argc, &argv);
+  // the me represents the rank value here
   MPI_Comm_rank(MPI_COMM_WORLD, &me);
   MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
 
@@ -260,7 +261,7 @@ int main(int argc, char** argv)
     }
   }
 
-
+  //init necessary components, atom neightbor...
   Atom atom(ntypes);
   Neighbor neighbor(ntypes);
   Integrate integrate;
@@ -283,19 +284,23 @@ int main(int argc, char** argv)
   }
 
   if(in.forcetype == FORCELJ) force = (Force*) new ForceLJ(ntypes);
-
+  
+  //init threads things
   threads.mpi_me = me;
   threads.mpi_num_threads = nprocs;
   threads.omp_me = 0;
   threads.omp_num_threads = num_threads;
-
+  
+  //the component need to hold the thread info
   atom.threads = &threads;
   comm.threads = &threads;
   force->threads = &threads;
   integrate.threads = &threads;
   neighbor.threads = &threads;
   thermo.threads = &threads;
-
+  
+  // there are two types of force, LJ and EAM, when it is LJ, we need to init some parameters
+  // epsilon sigma are two key parameters for LJ case
   if(in.forcetype == FORCELJ) {
     for(int i=0; i<ntypes*ntypes; i++) {
       force->epsilon[i] = in.epsilon;
@@ -303,11 +308,12 @@ int main(int argc, char** argv)
       force->sigma6[i] = in.sigma*in.sigma*in.sigma*in.sigma*in.sigma*in.sigma;
     }
   }
-
+  //TODO what is ghost newton?
   neighbor.ghost_newton = ghost_newton;
 
   omp_set_num_threads(num_threads);
-
+  
+  //some parameter configuration about each component
   neighbor.timer = &timer;
   force->timer = &timer;
   comm.check_safeexchange = check_safeexchange;
@@ -328,7 +334,7 @@ int main(int argc, char** argv)
   }
 
   if(num_steps > 0) in.ntimes = num_steps;
-
+  // init the domain size
   if(system_size > 0) {
     in.nx = system_size;
     in.ny = system_size;
@@ -347,7 +353,9 @@ int main(int argc, char** argv)
     else if(system_size < 0)
       in.nz = nx;
   }
-
+  
+  // set the neighbor size
+  // TODO the relationship between atom and neighbor?
   if(neighbor_size > 0) {
     neighbor.nbinx = neighbor_size;
     neighbor.nbiny = neighbor_size;
@@ -411,7 +419,9 @@ int main(int argc, char** argv)
 
   if(me == 0)
     printf("# Done .... \n");
+  
 
+  //the master process print out the configuration info
   if(me == 0) {
     fprintf(stdout, "# " VARIANT_STRING " output ...\n");
     fprintf(stdout, "# Run Settings: \n");
@@ -466,7 +476,8 @@ int main(int argc, char** argv)
   {
     thermo.compute(0, atom, neighbor, force, timer, comm);
   }
-
+  
+  //this is the main loop, we iterate several steps in this function
   timer.barrier_start(TIME_TOTAL);
   integrate.run(atom, force, neighbor, comm, thermo, timer);
   timer.barrier_stop(TIME_TOTAL);
