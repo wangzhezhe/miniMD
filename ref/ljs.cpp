@@ -422,6 +422,7 @@ int main(int argc, char** argv)
   
 
   //the master process print out the configuration info
+  //there are three types setting, run settings, physical settings and technical settings
   if(me == 0) {
     fprintf(stdout, "# " VARIANT_STRING " output ...\n");
     fprintf(stdout, "# Run Settings: \n");

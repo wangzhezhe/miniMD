@@ -319,7 +319,8 @@ void create_box(Atom &atom, int nx, int ny, int nz, double rho)
 int create_atoms(Atom &atom, int nx, int ny, int nz, double rho)
 {
   //refer to this https://chem.libretexts.org/Bookshelves/Physical_and_Theoretical_Chemistry_Textbook_Maps/Supplemental_Modules_(Physical_and_Theoretical_Chemistry)/Physical_Properties_of_Matter/States_of_Matter/Properties_of_Solids/Crystal_Lattice/Closest_Pack_Structures
-  //for atoms per unit cell
+  //four atoms per unit cell
+  //there is difference between the atom and the lattice
   /* total # of atoms */
   atom.natoms = 4 * nx * ny * nz;
   atom.nlocal = 0;
@@ -343,11 +344,9 @@ int create_atoms(Atom &atom, int nx, int ny, int nz, double rho)
   khi = MIN(khi, 2 * nz - 1);
 
   /* each proc generates positions and velocities of atoms on fcc sublattice
-       that overlaps its box
-     only store atoms that fall in my box
+       that overlaps its box only store atoms that fall in my box
      use atom # (generated from lattice coords) as unique seed to generate a
-       unique velocity
-     exercise RNG between calls to avoid correlations in adjacent atoms */
+       unique velocity exercise RNG between calls to avoid correlations in adjacent atoms */
 
   double xtmp, ytmp, ztmp, vx, vy, vz;
   int i, j, k, m, n;
